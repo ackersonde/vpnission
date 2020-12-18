@@ -2,7 +2,7 @@ name: Deploy Transmission under IPSec
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
