@@ -48,7 +48,7 @@ spec:
                 key: server
         args: ["$(PROTONVPN_SERVER)"]
         volumeMounts:
-          - name: dowload-destination
+          - name: media-volume
             mountPath: /mnt/torrents
       volumes:
         - name: media-volume
