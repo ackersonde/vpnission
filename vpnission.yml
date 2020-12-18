@@ -46,7 +46,11 @@ spec:
               configMapKeyRef:
                 name: protonvpn
                 key: server
-        args: ["$(PROTONVPN_SERVER)"]
+        #args: ["$(PROTONVPN_SERVER)"]
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
         volumeMounts:
           - name: media-volume
             mountPath: /mnt/torrents
@@ -66,6 +70,7 @@ data:
   CTX_VPN_EAP_ID: {{CTX_VPN_EAP_ID_B64}}
   CTX_VPN_SECRET: {{CTX_VPN_SECRET_B64}}
   TRANSMISSION_HOST_NAME: {{TRANSMISSION_HOST_NAME_B64}}
+  PROTON_SERVER: {{PROTONVPN_SERVER}}
 
 ---
 apiVersion: v1

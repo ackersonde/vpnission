@@ -20,12 +20,4 @@ ADD scripts/updown_ipsec.sh /etc/
 ADD scripts/start.sh /root/
 ENTRYPOINT ["/root/start.sh"]
 
-# build as: sudo docker build . -t vpnission
-# run as:
-# sudo docker run -d --name vpnission \
-# --cap-add NET_ADMIN -p 9091:9091 \
-# -v /mnt/usb4TB/DLNA/torrents:/mnt/torrents vpnission
-#
-# cleanup: sudo docker container prune -f
 # test torrent: http://www.frostclick.com/torrents/video/animation/Big_Buck_Bunny_1080p_surround_frostclick.com_frostwire.com.torrent
-
