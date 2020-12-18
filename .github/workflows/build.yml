@@ -43,7 +43,7 @@ jobs:
           # TODO: need to create local secret once repo created
           echo -n "${{ secrets.TRANSMISSION_HOST_NAME }}" | base64 | tr -d \\n > .base64_enc
           export TRANSMISSION_HOST_NAME_B64=`cat .base64_enc`
-          sed -i -e "s@{{CTX_VPN_SECRET_B64}}@$TRANSMISSION_HOST_NAME_B64@" vpnission.yml
+          sed -i -e "s@{{TRANSMISSION_HOST_NAME_B64}}@$TRANSMISSION_HOST_NAME_B64@" vpnission.yml
 
       - name: Create wireguard tunnel configuration
         run: |
