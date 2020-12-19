@@ -7,13 +7,14 @@ RUN apk -u add strongswan transmission-daemon transmission-cli #detox@testing
 # Transmission stuff
 RUN mkdir /root/Downloads /mnt/torrents
 ADD config/settings.json /root/.config/transmission-daemon/
+
 ADD scripts/finished_torrent.sh /root/
 RUN chmod u+x /root/finished_torrent.sh
-EXPOSE 9091
-net.core.rmem_max = 4194304
-net.core.wmem_max = 1048576
-/etc/sysctl.conf
 
+RUN echo "net.core.rmem_max = 4194304" >> /etc/sysctl.conf
+RUN echo "net.core.wmem_max = 1048576" >> /etc/sysctl.conf
+
+EXPOSE 9091
 
 # IPsec stuff
 RUN wget https://protonvpn.com/download/ProtonVPN_ike_root.der -O /etc/swanctl/x509/protonvpn.der
