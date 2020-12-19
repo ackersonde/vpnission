@@ -1,4 +1,4 @@
-FROM multiarch/alpine:armv7-latest-stable
+FROM multiarch/alpine:arm64
 
 # need edge@testing for detox binary ...
 #RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
@@ -10,6 +10,10 @@ ADD config/settings.json /root/.config/transmission-daemon/
 ADD scripts/finished_torrent.sh /root/
 RUN chmod u+x /root/finished_torrent.sh
 EXPOSE 9091
+net.core.rmem_max = 4194304
+net.core.wmem_max = 1048576
+/etc/sysctl.conf
+
 
 # IPsec stuff
 RUN wget https://protonvpn.com/download/ProtonVPN_ike_root.der -O /etc/swanctl/x509/protonvpn.der
