@@ -1,4 +1,4 @@
-FROM multiarch/alpine:arm64
+FROM multiarch/alpine:arm64-latest-stable
 
 # need edge@testing for detox binary ...
 #RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
