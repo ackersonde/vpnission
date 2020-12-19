@@ -9,21 +9,21 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-#      - name: Build application and docker image
-#        run: |
-          #docker run --rm --privileged multiarch/qemu-user-static:register
-#          sudo docker build --compress -t danackerson/vpnission:vg$GITHUB_RUN_ID .
+      - name: Build application and docker image
+        run: |
+          docker run --rm --privileged multiarch/qemu-user-static:register
+          docker build --compress -t danackerson/vpnission:vg$GITHUB_RUN_ID .
 
-#          sudo docker login -u ${{ secrets.CTX_DOCKER_USER }} -p ${{ secrets.CTX_DOCKER_PASS }}
-#          sudo docker tag danackerson/vpnission:vg$GITHUB_RUN_ID danackerson/vpnission:latest
-#          sudo docker push danackerson/vpnission:vg$GITHUB_RUN_ID
-#          sudo docker push danackerson/vpnission:latest
+          docker login -u ${{ secrets.CTX_DOCKER_USER }} -p ${{ secrets.CTX_DOCKER_PASS }}
+          docker tag danackerson/vpnission:vg$GITHUB_RUN_ID danackerson/vpnission:latest
+          docker push danackerson/vpnission:vg$GITHUB_RUN_ID
+          docker push danackerson/vpnission:latest
 
       - name: Prepare K8S bundle config
-        run: | # danackerson/vpnission:vg432323313
-          export GITHUB_RUN_ID_B64=`echo -n 432323313 | base64`
+        run: |
+          export GITHUB_RUN_ID_B64=`echo -n $GITHUB_RUN_ID" | base64`
           sed -i -e "s@{{GITHUB_RUN_ID_B64}}@$GITHUB_RUN_ID_B64@" vpnission.yml
-          sed -i -e "s@{{GITHUB_RUN_ID}}@432323313@" vpnission.yml
+          sed -i -e "s@{{GITHUB_RUN_ID}}@$GITHUB_RUN_ID@" vpnission.yml
 
           sed -i -e "s@{{CTX_SERVER_DEPLOY_SECRET_B64}}@${{ secrets.CTX_SERVER_DEPLOY_SECRET_B64 }}@" vpnission.yml
           sed -i -e "s@{{CTX_SERVER_DEPLOY_CACERT_B64}}@${{ secrets.CTX_SERVER_DEPLOY_CACERT_B64 }}@" vpnission.yml
