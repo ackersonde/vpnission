@@ -9,21 +9,21 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
-      - name: Build application and docker image
-        run: |
+#      - name: Build application and docker image
+#        run: |
           #docker run --rm --privileged multiarch/qemu-user-static:register
-          sudo docker build --compress -t danackerson/vpnission:vg$GITHUB_RUN_ID .
+#          sudo docker build --compress -t danackerson/vpnission:vg$GITHUB_RUN_ID .
 
-          sudo docker login -u ${{ secrets.CTX_DOCKER_USER }} -p ${{ secrets.CTX_DOCKER_PASS }}
-          sudo docker tag danackerson/vpnission:vg$GITHUB_RUN_ID danackerson/vpnission:latest
-          sudo docker push danackerson/vpnission:vg$GITHUB_RUN_ID
-          sudo docker push danackerson/vpnission:latest
+#          sudo docker login -u ${{ secrets.CTX_DOCKER_USER }} -p ${{ secrets.CTX_DOCKER_PASS }}
+#          sudo docker tag danackerson/vpnission:vg$GITHUB_RUN_ID danackerson/vpnission:latest
+#          sudo docker push danackerson/vpnission:vg$GITHUB_RUN_ID
+#          sudo docker push danackerson/vpnission:latest
 
       - name: Prepare K8S bundle config
-        run: |
-          export GITHUB_RUN_ID_B64=`echo -n $GITHUB_RUN_ID | base64`
+        run: | # danackerson/vpnission:vg432323313
+          export GITHUB_RUN_ID_B64=`echo -n 432323313 | base64`
           sed -i -e "s@{{GITHUB_RUN_ID_B64}}@$GITHUB_RUN_ID_B64@" vpnission.yml
-          sed -i -e "s@{{GITHUB_RUN_ID}}@$GITHUB_RUN_ID@" vpnission.yml
+          sed -i -e "s@{{GITHUB_RUN_ID}}@432323313@" vpnission.yml
 
           sed -i -e "s@{{CTX_SERVER_DEPLOY_SECRET_B64}}@${{ secrets.CTX_SERVER_DEPLOY_SECRET_B64 }}@" vpnission.yml
           sed -i -e "s@{{CTX_SERVER_DEPLOY_CACERT_B64}}@${{ secrets.CTX_SERVER_DEPLOY_CACERT_B64 }}@" vpnission.yml
@@ -66,9 +66,9 @@ jobs:
 
           scp -o StrictHostKeyChecking=no vpnission.yml $SSH_CXN:~/k3s/
           ssh $SSH_CXN << EOF
-            sudo kubectl create configmap protonvpn --from-literal=server=nl-15 || \
-              sudo kubectl create configmap protonvpn --from-literal=server=nl-15 \
-              -o yaml --dry-run=client | sudo kubectl replace -f -
+            #sudo kubectl create configmap protonvpn --from-literal=server=nl-15 || \
+            #  sudo kubectl create configmap protonvpn --from-literal=server=nl-15 \
+            #  -o yaml --dry-run=client | sudo kubectl replace -f -
 
             sudo kubectl apply -f k3s/vpnission.yml
           EOF
