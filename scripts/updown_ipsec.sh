@@ -220,7 +220,7 @@ down-host:)
 	# connection to me going down
 	# If you are doing a custom version, firewall commands go here.
 	;;
-up-client)
+up-client:)
     IF=$(ip r get ${PLUTO_PEER_CLIENT}|sed -ne 's,^.*dev \(\S\+\) .*,\1,p')
     # NAT for using local IPV4 address in rightsourceip:
     iptables -t nat -A POSTROUTING -s ${PLUTO_PEER_CLIENT} -o $IF -m policy --dir out --pol ipsec -j ACCEPT
@@ -229,7 +229,7 @@ up-client)
 	sed -rie 's/"bind-address-ipv4": "(.*)"/"bind-address-ipv4": "'$PLUTO_MY_SOURCEIP'"/' /root/.config/transmission-daemon/settings.json
 	/usr/bin/transmission-daemon
     ;;
-down-client)
+down-client:)
     IF=$(ip r get ${PLUTO_PEER_CLIENT}|sed -ne 's,^.*dev \(\S\+\) .*,\1,p')
     # NAT for using local IPV4 address in rightsourceip:
     iptables -t nat -D POSTROUTING -s ${PLUTO_PEER_CLIENT} -o $IF -m policy --dir out --pol ipsec -j ACCEPT
@@ -409,7 +409,7 @@ down-host-v6:)
 	# connection to me going down
 	# If you are doing a custom version, firewall commands go here.
 	;;
-up-client-v6)
+up-client-v6:)
 	IF=$(ip -6 r get ${PLUTO_PEER_CLIENT%????}|sed -ne 's,^.*dev \(\S\+\) .*,\1,p')
 	# ARP proxy for using public IPv6 address in rightsourceip:
 	#ip -6 neigh add proxy ${PLUTO_PEER_CLIENT%????} dev $IF
@@ -417,7 +417,7 @@ up-client-v6)
 	ip6tables -t nat -A POSTROUTING -s ${PLUTO_PEER_CLIENT%????} -o $IF -m policy --dir out --pol ipsec -j ACCEPT
 	ip6tables -t nat -A POSTROUTING -s ${PLUTO_PEER_CLIENT%????} -o $IF -j MASQUERADE
 	;;
-down-client-v6)
+down-client-v6:)
 	IF=$(ip -6 r get ${PLUTO_PEER_CLIENT%????}|sed -ne 's,^.*dev \(\S\+\) .*,\1,p')
 	# ARP proxy for using public IPv6 address in rightsourceip:
 	#ip -6 neigh delete proxy ${PLUTO_PEER_CLIENT%????} dev $IF
