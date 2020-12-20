@@ -5,7 +5,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vpnission-deploy
+  name: vpnission
 spec:
   replicas: 1
   selector:
@@ -50,7 +50,6 @@ spec:
           capabilities:
             add:
               - NET_ADMIN
-              - SYS_MODULE
         volumeMounts:
           - name: media-volume
             mountPath: /mnt/torrents
