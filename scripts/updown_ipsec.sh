@@ -221,19 +221,11 @@ down-host:)
 	# If you are doing a custom version, firewall commands go here.
 	;;
 up-client:)
-    IF=$(ip r get ${PLUTO_PEER_CLIENT}|sed -ne 's,^.*dev \(\S\+\) .*,\1,p')
-    # NAT for using local IPV4 address in rightsourceip:
-    iptables -t nat -A POSTROUTING -s ${PLUTO_PEER_CLIENT} -o $IF $IPSEC_POLICY_IN -j ACCEPT
-    iptables -t nat -A POSTROUTING -s ${PLUTO_PEER_CLIENT} -o $IF -j MASQUERADE
 	# Prepare transmission
 	sed -rie 's/"bind-address-ipv4": "(.*)"/"bind-address-ipv4": "'$PLUTO_MY_SOURCEIP'"/' /root/.config/transmission-daemon/settings.json
 	/usr/bin/transmission-daemon
     ;;
 down-client:)
-    IF=$(ip r get ${PLUTO_PEER_CLIENT}|sed -ne 's,^.*dev \(\S\+\) .*,\1,p')
-    # NAT for using local IPV4 address in rightsourceip:
-    iptables -t nat -D POSTROUTING -s ${PLUTO_PEER_CLIENT} -o $IF $IPSEC_POLICY_IN -j ACCEPT
-    iptables -t nat -D POSTROUTING -s ${PLUTO_PEER_CLIENT} -o $IF -j MASQUERADE
 	# remove transmission
 	kill -9 $(pgrep transmission-daemon)
     ;;
@@ -410,20 +402,12 @@ down-host-v6:)
 	# If you are doing a custom version, firewall commands go here.
 	;;
 up-client-v6:)
-	IF=$(ip -6 r get ${PLUTO_PEER_CLIENT%????}|sed -ne 's,^.*dev \(\S\+\) .*,\1,p')
-	# ARP proxy for using public IPv6 address in rightsourceip:
-	#ip -6 neigh add proxy ${PLUTO_PEER_CLIENT%????} dev $IF
-	# NAT for using local IPv6 address in rightsourceip:
-	ip6tables -t nat -A POSTROUTING -s ${PLUTO_PEER_CLIENT%????} -o $IF $IPSEC_POLICY_IN -j ACCEPT
-	ip6tables -t nat -A POSTROUTING -s ${PLUTO_PEER_CLIENT%????} -o $IF -j MASQUERADE
+	# connection to my client subnet coming up
+	# If you are doing a custom version, firewall commands go here.
 	;;
 down-client-v6:)
-	IF=$(ip -6 r get ${PLUTO_PEER_CLIENT%????}|sed -ne 's,^.*dev \(\S\+\) .*,\1,p')
-	# ARP proxy for using public IPv6 address in rightsourceip:
-	#ip -6 neigh delete proxy ${PLUTO_PEER_CLIENT%????} dev $IF
-	# NAT for using local IPv6 address in rightsourceip:
-	ip6tables -t nat -D POSTROUTING -s ${PLUTO_PEER_CLIENT%????} -o $IF $IPSEC_POLICY_IN -j ACCEPT
-	ip6tables -t nat -D POSTROUTING -s ${PLUTO_PEER_CLIENT%????} -o $IF -j MASQUERADE
+	# connection to my client subnet coming up
+	# If you are doing a custom version, firewall commands go here.
 	;;
 up-host-v6:iptables)
 	# connection to me, with (left/right)firewall=yes, coming up

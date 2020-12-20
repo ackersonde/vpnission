@@ -10,12 +10,12 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      run: mountusb-mediaserver # needs to be on server attached to Media drive
+      run: vpnission
   revisionHistoryLimit: 5
   template:
     metadata:
       labels:
-        run: mountusb-mediaserver
+        run: vpnission
     spec:
       restartPolicy: Always
       nodeSelector:
@@ -46,7 +46,6 @@ spec:
               configMapKeyRef:
                 name: protonvpn
                 key: server
-        #args: ["$(PROTONVPN_SERVER)"]
         securityContext:
           capabilities:
             add:
