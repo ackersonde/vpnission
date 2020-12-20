@@ -222,11 +222,13 @@ down-host:)
 	;;
 up-client:)
 	# Prepare transmission
+	# ip rule add priority 219 to 192.168.178.0/24 lookup main
 	sed -rie 's/"bind-address-ipv4": "(.*)"/"bind-address-ipv4": "'$PLUTO_MY_SOURCEIP'"/' /root/.config/transmission-daemon/settings.json
 	/usr/bin/transmission-daemon
     ;;
 down-client:)
 	# remove transmission
+	# ip rule delete priority 219
 	kill -9 $(pgrep transmission-daemon)
     ;;
 up-host:iptables)
