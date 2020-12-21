@@ -14,7 +14,7 @@ RUN chmod u+x /root/finished_torrent.sh
 EXPOSE 9091
 
 # IPsec stuff
-RUN echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+#RUN echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
 RUN echo "net.core.rmem_max=4194304" >> /etc/sysctl.conf
 RUN echo "net.core.wmem_max=1048576" >> /etc/sysctl.conf
 
