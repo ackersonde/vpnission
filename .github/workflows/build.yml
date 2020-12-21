@@ -49,11 +49,10 @@ jobs:
           ssh-keygen -L -f ~/.ssh/id_ed25519-cert.pub
           wg-quick up tunnel
 
-          scp -o StrictHostKeyChecking=no vpnission.env.list $SSH_CXN:~/
+          scp -o StrictHostKeyChecking=no vpnission.env.list $SSH_CXN:~/.config/
           ssh $SSH_CXN << EOF
-            sudo chmod 400 ./vpnission.env.list
             sudo docker rm -f vpnission || true
-            sudo docker run --env-file ./vpnission.env.list -d \
+            sudo docker run --env-file .config/vpnission.env.list -d \
               --name vpnission --cap-add NET_ADMIN -p9091:9091 -p51413:51413 \
               -v /mnt/usb4TB/DLNA/torrents:/mnt/torrents \
               danackerson/vpnission:vg$GITHUB_RUN_ID
