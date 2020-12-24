@@ -21,9 +21,6 @@ jobs:
 
       - name: Prepare K8S bundle config
         run: |
-          export GITHUB_RUN_ID_B64=`echo -n $GITHUB_RUN_ID | base64`
-          sed -i -e "s@{{GITHUB_RUN_ID}}@@" vpnission.yml
-
           echo "GITHUB_RUN_ID=$GITHUB_RUN_ID" > vpnission.env.list
           echo "CTX_PLEX_TOKEN=${{ secrets.CTX_PLEX_TOKEN }}" >> vpnission.env.list
           echo "CTX_VPN_EAP_ID=${{ secrets.CTX_VPN_EAP_ID }}" >> vpnission.env.list
