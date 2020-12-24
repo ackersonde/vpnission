@@ -2,7 +2,7 @@ name: Deploy Transmission under IPSec
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, ipsec-docker ]
 
 jobs:
   build:
@@ -21,29 +21,11 @@ jobs:
 
       - name: Prepare K8S bundle config
         run: |
-          export GITHUB_RUN_ID_B64=`echo -n $GITHUB_RUN_ID | base64`
-          sed -i -e "s@{{GITHUB_RUN_ID_B64}}@$GITHUB_RUN_ID_B64@" vpnission.yml
-          sed -i -e "s@{{GITHUB_RUN_ID}}@$GITHUB_RUN_ID@" vpnission.yml
-
-          sed -i -e "s@{{CTX_SERVER_DEPLOY_SECRET_B64}}@${{ secrets.CTX_SERVER_DEPLOY_SECRET_B64 }}@" vpnission.yml
-          sed -i -e "s@{{CTX_SERVER_DEPLOY_CACERT_B64}}@${{ secrets.CTX_SERVER_DEPLOY_CACERT_B64 }}@" vpnission.yml
-
-          echo -n "${{ secrets.CTX_PLEX_TOKEN }}" | base64 | tr -d \\n > .base64_enc
-          export CTX_PLEX_TOKEN_B64=`cat .base64_enc`
-          sed -i -e "s@{{CTX_PLEX_TOKEN_B64}}@$CTX_PLEX_TOKEN_B64@" vpnission.yml
-
-          echo -n "${{ secrets.CTX_VPN_EAP_ID }}" | base64 | tr -d \\n > .base64_enc
-          export CTX_VPN_EAP_ID_B64=`cat .base64_enc`
-          sed -i -e "s@{{CTX_VPN_EAP_ID_B64}}@$CTX_VPN_EAP_ID_B64@" vpnission.yml
-
-          echo -n "${{ secrets.CTX_VPN_SECRET }}" | base64 | tr -d \\n > .base64_enc
-          export CTX_VPN_SECRET_B64=`cat .base64_enc`
-          sed -i -e "s@{{CTX_VPN_SECRET_B64}}@$CTX_VPN_SECRET_B64@" vpnission.yml
-
-          # TODO: need to create local secret once repo created
-          echo -n "${{ secrets.TRANSMISSION_HOST_NAME }}" | base64 | tr -d \\n > .base64_enc
-          export TRANSMISSION_HOST_NAME_B64=`cat .base64_enc`
-          sed -i -e "s@{{TRANSMISSION_HOST_NAME_B64}}@$TRANSMISSION_HOST_NAME_B64@" vpnission.yml
+          echo "GITHUB_RUN_ID=$GITHUB_RUN_ID" > vpnission.env.list
+          echo "CTX_PLEX_TOKEN=${{ secrets.CTX_PLEX_TOKEN }}" >> vpnission.env.list
+          echo "CTX_VPN_EAP_ID=${{ secrets.CTX_VPN_EAP_ID }}" >> vpnission.env.list
+          echo "CTX_VPN_SECRET=${{ secrets.CTX_VPN_SECRET }}" >> vpnission.env.list
+          echo "TRANSMISSION_HOST_NAME=${{ secrets.TRANSMISSION_HOST_NAME }}" >> vpnission.env.list
 
       - name: Create wireguard tunnel configuration
         run: |
@@ -59,23 +41,23 @@ jobs:
 
       - name: Deploy to K8S
         env:
-          SSH_CXN: ${{ secrets.CTX_K8S_SSH_USER }}@${{ secrets.CTX_K8S_SSH_HOST }}
+          SSH_CXN: ${{ secrets.CTX_K8S_SSH_USER }}@vpnpi
         run: |
           ssh-keygen -L -f ~/.ssh/id_ed25519-cert.pub
           wg-quick up tunnel
 
-          scp -o StrictHostKeyChecking=no vpnission.yml $SSH_CXN:~/k3s/
+          scp -o StrictHostKeyChecking=no vpnission.env.list $SSH_CXN:~/.config/
           ssh $SSH_CXN << EOF
-            #sudo kubectl create configmap protonvpn --from-literal=server=nl-15 || \
-            #  sudo kubectl create configmap protonvpn --from-literal=server=nl-15 \
-            #  -o yaml --dry-run=client | sudo kubectl replace -f -
-
-            sudo kubectl apply -f k3s/vpnission.yml
+            sudo docker rm -f vpnission || true
+            sudo docker run --env-file .config/vpnission.env.list -d \
+              --name vpnission --cap-add NET_ADMIN -p9091:9091 -p51413:51413 \
+              -v /mnt/usb4TB/DLNA/torrents:/mnt/torrents \
+              danackerson/vpnission:vg$GITHUB_RUN_ID
           EOF
 
           wg-quick down tunnel
 
-          rm -Rf ~/.ssh
+          rm -Rf ~/.ssh ~/vpnission.env.list
 
           curl -s -o /dev/null -X POST -d token=${{ secrets.CTX_SLACK_NOTIFICATIONS_TOKEN }} -d channel=C092UE0H4 \
             -d text="<https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID | $GITHUB_REPOSITORY @ $GITHUB_RUN_ID>" \
