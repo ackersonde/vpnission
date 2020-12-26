@@ -49,6 +49,7 @@ jobs:
           scp -o StrictHostKeyChecking=no vpnission.env.list $SSH_CXN:~/.config/
           ssh $SSH_CXN << EOF
             sudo docker rm -f vpnission || true
+            sudo docker pull danackerson/vpnission
             sudo docker run --env-file .config/vpnission.env.list -d \
               --name vpnission --cap-add NET_ADMIN -p9091:9091 -p51413:51413 \
               --restart always -v /mnt/usb4TB/DLNA/torrents:/mnt/torrents \
