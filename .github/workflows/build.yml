@@ -22,7 +22,6 @@ jobs:
       - name: Prepare K8S bundle config
         run: |
           echo "GITHUB_RUN_ID=$GITHUB_RUN_ID" > vpnission.env.list
-          echo "CTX_PLEX_TOKEN=${{ secrets.CTX_PLEX_TOKEN }}" >> vpnission.env.list
           echo "CTX_VPN_EAP_ID=${{ secrets.CTX_VPN_EAP_ID }}" >> vpnission.env.list
           echo "CTX_VPN_SECRET=${{ secrets.CTX_VPN_SECRET }}" >> vpnission.env.list
           echo "TRANSMISSION_HOST_NAME=${{ secrets.TRANSMISSION_HOST_NAME }}" >> vpnission.env.list
