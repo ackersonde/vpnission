@@ -2,13 +2,19 @@ name: Deploy Transmission under IPSec
 
 on:
   push:
-    branches: [ main, ipsec-docker ]
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-20.04
+    env:
+      CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN: ${{ secrets.CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN }}
+      CTX_DIGITALOCEAN_FIREWALL: ${{ secrets.CTX_DIGITALOCEAN_FIREWALL }}
+      CTX_SSH_DEPLOY_FINGERPRINT: ${{ secrets.CTX_SSH_DEPLOY_FINGERPRINT }}
+      SSH_CXN: ${{ secrets.CTX_IPV6_SLAVE_HOME }}
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
       - name: Build application and docker image
         run: |
           docker run --rm --privileged multiarch/qemu-user-static:register
@@ -19,34 +25,23 @@ jobs:
           docker push danackerson/vpnission:vg$GITHUB_RUN_ID
           docker push danackerson/vpnission:latest
 
-      - name: Prepare K8S bundle config
+      - name: Prepare environment and deploy
         run: |
+          git clone https://github.com/ackersonde/digitaloceans.git
+          cd digitaloceans
+          go get -t -d -v ./...
+          go build do.go
+          cd ../
+
           echo "GITHUB_RUN_ID=$GITHUB_RUN_ID" > vpnission.env.list
           echo "CTX_VPN_EAP_ID=${{ secrets.CTX_VPN_EAP_ID }}" >> vpnission.env.list
           echo "CTX_VPN_SECRET=${{ secrets.CTX_VPN_SECRET }}" >> vpnission.env.list
           echo "TRANSMISSION_HOST_NAME=${{ secrets.TRANSMISSION_HOST_NAME }}" >> vpnission.env.list
 
-      - name: Create wireguard tunnel configuration
-        run: |
-          sudo apt-get install wireguard resolvconf
-          echo "${{ secrets.CTX_WIREGUARD_GITHUB_ACTIONS_CLIENT_CONFIG }}" | sudo tee /etc/wireguard/tunnel.conf
-
-      - name: Prepare ssh key for remote login
-        run: |
-          mkdir ~/.ssh/
-          echo "${{ secrets.CTX_SERVER_DEPLOY_SECRET_B64 }}" | base64 -d > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          echo "${{ secrets.CTX_SERVER_DEPLOY_CACERT_B64 }}" | base64 -d > ~/.ssh/id_ed25519-cert.pub
-
-      - name: Deploy to K8S
-        env:
-          SSH_CXN: ${{ secrets.CTX_K8S_SSH_USER }}@vpnpi
-        run: |
-          ssh-keygen -L -f ~/.ssh/id_ed25519-cert.pub
-          wg-quick up tunnel
-
-          scp -o StrictHostKeyChecking=no vpnission.env.list $SSH_CXN:~/.config/
-          ssh $SSH_CXN << EOF
+          cat <<DEPLOY_EOF >deploy-vpnission.sh
+          #!/usr/bin/bash
+          scp -o StrictHostKeyChecking=no vpnission.env.list ubuntu@$SSH_CXN:~/.config/
+          ssh ubuntu@$SSH_CXN << EOF
             sudo docker rm -f vpnission || true
             sudo docker pull danackerson/vpnission
             sudo docker run --env-file .config/vpnission.env.list -d \
@@ -54,10 +49,24 @@ jobs:
               --restart always -v /mnt/usb4TB/DLNA/torrents:/mnt/torrents \
               danackerson/vpnission:vg$GITHUB_RUN_ID
           EOF
+          DEPLOY_EOF
 
-          wg-quick down tunnel
+          mkdir ~/.ssh
+          cat <<EOF >~/.ssh/id_rsa
+          ${{ secrets.CTX_DIGITALOCEAN_SSH_PRIVKEY }}
+          EOF
+          chmod 400 ~/.ssh/id_rsa
 
-          rm -Rf ~/.ssh ~/vpnission.env.list
+          public_ip_address=$(curl -s https://checkip.amazonaws.com)
+          ./digitaloceans/do -fn=firewallSSH -allow=true -ip=$public_ip_address -tag=traefik
+          source /tmp/new_digital_ocean_droplet_params
+
+          scp -o StrictHostKeyChecking=no vpnission.env.list deploy-vpnission.sh root@ackerson.de:~/
+          ssh root@ackerson.de ./deploy-vpnission.sh
+          ssh root@ackerson.de rm vpnission.env.list deploy-vpnission.sh
+
+          rm -Rf .ssh/ deploy-vpnission.sh vpnission.env.list /tmp/new_digital_ocean_droplet_params
+          ./digitaloceans/do -fn=firewallSSH -allow=false -ip=$public_ip_address
 
           curl -s -o /dev/null -X POST -d token=${{ secrets.CTX_SLACK_NOTIFICATIONS_TOKEN }} -d channel=C092UE0H4 \
             -d text="<https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID | $GITHUB_REPOSITORY @ $GITHUB_RUN_ID>" \
