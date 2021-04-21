@@ -50,6 +50,7 @@ jobs:
               danackerson/vpnission:vg$GITHUB_RUN_ID
           EOF
           DEPLOY_EOF
+          chmod 700 deploy-vpnission.sh
 
           mkdir ~/.ssh
           cat <<EOF >~/.ssh/id_rsa
