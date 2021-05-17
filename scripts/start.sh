@@ -16,6 +16,4 @@ sed -i -e "s@{{TRANSMISSION_HOST_NAME}}@$TRANSMISSION_HOST_NAME@" /root/.config/
 ping -c 5 google.com # prime DNS
 /usr/sbin/swanctl -q && /usr/sbin/swanctl -i -c protonvpn
 
-echo "https://github.com/ackersonde/vpnission/actions/runs/$GITHUB_RUN_ID" > /tmp/version
-
 /usr/bin/tail -f /dev/null
