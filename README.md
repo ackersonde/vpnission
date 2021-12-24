@@ -8,6 +8,6 @@ It's turtles all the way down: as this runs on one of my home raspberry PIs, the
 
 Because of the additional "hops", the [environment variables](https://github.com/ackersonde/vpnission/blob/main/.github/workflows/build.yml#L47) also need to be carefully pushed around for correct operation.
 
-Rebuilding the docker image is only necessary if/when my VPN service changes requirements or you need to rework some of the internal bells & whistles (media server requirements, etc.).
+Rebuilding the docker image is necessary if/when my VPN service changes requirements or you need to rework some of the internal bells & whistles (media server requirements, etc.) or it's time to use latest version of OS + software.
 
 Used everyday by my [bender slackbot](https://github.com/ackersonde/bender-slackbot/) after he determines which is the [most performant VPN server](https://github.com/ackersonde/bender-slackbot/blob/master/commands/vpntunnel.go#L159).
