@@ -43,7 +43,7 @@ jobs:
             sudo docker rm -f vpnission || true
             sudo docker pull danackerson/vpnission
             sudo docker run --env-file .config/vpnission.env.list -d --restart always \
-              --name vpnission --privileged -p9091:9091 -p51413:51413 \
+              --name vpnission --privileged \
               -v /etc/wireguard:/etc/wireguard -v /mnt/usb4TB/DLNA/torrents:/mnt/torrents \
               danackerson/vpnission:vg$GITHUB_RUN_ID
           EOF
