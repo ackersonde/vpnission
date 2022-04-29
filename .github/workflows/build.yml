@@ -42,9 +42,9 @@ jobs:
           ssh ubuntu@$SSH_CXN << EOF
             sudo docker rm -f vpnission || true
             sudo docker pull danackerson/vpnission
-            sudo docker run --env-file .config/vpnission.env.list -d \
-              --name vpnission --cap-add NET_ADMIN -p9091:9091 -p51413:51413 \
-              --restart always -v /etc/wireguard:/etc/wireguard -v /mnt/usb4TB/DLNA/torrents:/mnt/torrents \
+            sudo docker run --env-file .config/vpnission.env.list -d --restart always \
+              --name vpnission --privileged -p9091:9091 -p51413:51413 \
+              -v /etc/wireguard:/etc/wireguard -v /mnt/usb4TB/DLNA/torrents:/mnt/torrents \
               danackerson/vpnission:vg$GITHUB_RUN_ID
           EOF
           DEPLOY_EOF
