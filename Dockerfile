@@ -18,8 +18,6 @@ EXPOSE 9091
 RUN echo "net.core.rmem_max=4194304" >> /etc/sysctl.conf
 RUN echo "net.core.wmem_max=1048576" >> /etc/sysctl.conf
 
-ADD scripts/updown_ipsec.sh /etc/
-
 ADD scripts/start.sh /root/
 ENTRYPOINT ["/root/start.sh"]
 
