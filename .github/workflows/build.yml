@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     env:
       CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN: ${{ secrets.CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN }}
       CTX_DIGITALOCEAN_FIREWALL: ${{ secrets.CTX_DIGITALOCEAN_FIREWALL }}
@@ -34,8 +34,6 @@ jobs:
           cd ../
 
           echo "GITHUB_RUN_ID=$GITHUB_RUN_ID" > vpnission.env.list
-          echo "CTX_VPN_EAP_ID=${{ secrets.CTX_VPN_EAP_ID }}" >> vpnission.env.list
-          echo "CTX_VPN_SECRET=${{ secrets.CTX_VPN_SECRET }}" >> vpnission.env.list
           echo "TRANSMISSION_HOST_NAME=${{ secrets.TRANSMISSION_HOST_NAME }}" >> vpnission.env.list
 
           cat <<DEPLOY_EOF >deploy-vpnission.sh
@@ -46,7 +44,7 @@ jobs:
             sudo docker pull danackerson/vpnission
             sudo docker run --env-file .config/vpnission.env.list -d \
               --name vpnission --cap-add NET_ADMIN -p9091:9091 -p51413:51413 \
-              --restart always -v /mnt/usb4TB/DLNA/torrents:/mnt/torrents \
+              --restart always -v /etc/wireguard:/etc/wireguard -v /mnt/usb4TB/DLNA/torrents:/mnt/torrents \
               danackerson/vpnission:vg$GITHUB_RUN_ID
           EOF
           DEPLOY_EOF

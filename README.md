@@ -1,7 +1,7 @@
 ![Deploy Transmission under IPSec](https://github.com/ackersonde/vpnission/workflows/Deploy%20Transmission%20under%20IPSec/badge.svg)
 
 # vpnission
-IPSec VPN + Transmission <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Transmission_Icon.svg/64px-Transmission_Icon.svg.png" width="16"> running in one, easy to customize and redeploy docker container.
+Wireguard + Transmission <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Transmission_Icon.svg/64px-Transmission_Icon.svg.png" width="16"> running in one, easy to customize and redeploy docker container.
 
 # Build + Deploy
 It's turtles all the way down: as this runs on one of my home raspberry PIs, the Github Action needs to prepare the deployment and execute it on my DigitalOcean droplet. This droplet, in turn, has access to my (IPv6) home network where it ultimately redeploys the correctly configured docker container.

@@ -1,19 +1,17 @@
 #!/bin/ash
-/sbin/syslogd && /usr/sbin/ipsec start
+/sbin/syslogd
 
 PROTONVPN_SERVER=$@
 if [ -z $@ ]
 then
-    PROTONVPN_SERVER=nl-10.protonvpn.com
+    PROTONVPN_SERVER=NL_1
 fi
 
-sed -i -e "s/{{VPN_SERVER}}/$PROTONVPN_SERVER/" /etc/swanctl/conf.d/protonvpn.conf
-sed -i -e "s/{{CTX_VPN_EAP_ID}}/$CTX_VPN_EAP_ID/g" /etc/swanctl/conf.d/protonvpn.conf
-sed -i -e "s@{{CTX_VPN_SECRET}}@$CTX_VPN_SECRET@" /etc/swanctl/conf.d/protonvpn.conf
 sed -i -e "s@{{GITHUB_RUN_ID}}@$GITHUB_RUN_ID@" /root/.config/transmission-daemon/settings.json
 sed -i -e "s@{{TRANSMISSION_HOST_NAME}}@$TRANSMISSION_HOST_NAME@" /root/.config/transmission-daemon/settings.json
 
-ping -c 5 google.com # prime DNS
-/usr/sbin/swanctl -q && /usr/sbin/swanctl -i -c protonvpn
+# ping -c 5 google.com # prime DNS
+/usr/bin/wg-quick up $PROTONVPN_SERVER
+/usr/bin/curl -4 https://ackerson.de/ip
 
 /usr/bin/tail -f /dev/null

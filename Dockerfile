@@ -2,7 +2,7 @@ FROM multiarch/alpine:arm64-edge
 
 # need edge@testing for detox binary ...
 RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
-RUN apk -u add strongswan transmission-daemon transmission-cli curl bind-tools detox@testing
+RUN apk -u add wireguard-tools transmission-daemon transmission-cli curl bind-tools detox@testing
 
 # Transmission stuff
 RUN mkdir /root/Downloads /mnt/torrents
@@ -18,9 +18,6 @@ EXPOSE 9091
 RUN echo "net.core.rmem_max=4194304" >> /etc/sysctl.conf
 RUN echo "net.core.wmem_max=1048576" >> /etc/sysctl.conf
 
-RUN wget https://protonvpn.com/download/ProtonVPN_ike_root.der -O /etc/swanctl/x509/protonvpn.der
-ADD config/charon.conf /etc/strongswan.d/
-ADD config/protonvpn.conf /etc/swanctl/conf.d/
 ADD scripts/updown_ipsec.sh /etc/
 
 ADD scripts/start.sh /root/
