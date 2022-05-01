@@ -38,9 +38,9 @@ jobs:
 
           cat <<DEPLOY_EOF >deploy-vpnission.sh
           #!/usr/bin/bash
-          ssh -o StrictHostKeyChecking=no ubuntu@SSH_CXN mkdir -p vpnission traefik/logs
-          scp docker-compose.yml ubuntu@SSH_CXN:~/vpnission
-          ssh ubuntu@chore.ackerson.de '\
+          ssh -o StrictHostKeyChecking=no ubuntu@$SSH_CXN mkdir -p vpnission traefik/logs
+          scp docker-compose.yml ubuntu@$SSH_CXN:~/vpnission
+          ssh ubuntu@$SSH_CXN '\
             curl -o traefik/dynamic_conf.yml https://raw.githubusercontent.com/ackersonde/digitaloceans/main/scripts/dynamic_conf.yml
             docker compose -f ./vpnission/docker-compose.yml down && \
             docker compose -f ./vpnission/docker-compose.yml pull && \
