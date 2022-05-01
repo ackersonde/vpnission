@@ -26,8 +26,6 @@ jobs:
           docker push danackerson/vpnission:vg$GITHUB_RUN_ID
           docker push danackerson/vpnission:latest
 
-      - name: Prepare environment and deploy
-        run: |
           git clone https://github.com/ackersonde/digitaloceans.git
           cd digitaloceans
           go get -t -d -v ./...
