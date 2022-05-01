@@ -25,6 +25,22 @@ services:
       - "9091:9091"
       - "51413:51413"
 
+  ## jelly (https://jellyfin.org/docs/general/administration/installing.html)
+  jelly:
+    restart: unless-stopped
+    image: jellyfin/jellyfin:latest
+    container_name: jelly
+    volumes:
+      - "/srv/jellyfin/config:/config"
+      - "/srv/jellyfin/cache:/cache"
+      - "/mnt/usb4TB/DLNA:/media"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jelly.tls.certResolver=letsencrypt"
+      - "traefik.http.routers.jelly.tls.domains=jelly.ackerson.de"
+      - "traefik.http.routers.jelly.rule=Host(`jelly.ackerson.de`)"
+      - "traefik.http.routers.jelly.middlewares=http-ratelimit@file,secHeaders@file"
+
   ## Traefik Server
   traefik:
     restart: unless-stopped
