@@ -30,6 +30,8 @@ services:
     restart: unless-stopped
     image: traefik:2.6
     container_name: traefik
+    environment:
+      - DO_AUTH_TOKEN=$CTX_DIGITALOCEAN_DNS_TOKEN \
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "~/traefik/logs:/var/log/traefik/"
@@ -49,9 +51,8 @@ services:
       - "--certificatesResolvers.letsencrypt.acme.storage=acme.json"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.middlewares.api_auth.basicauth.usersfile=/usersFile"
       - "traefik.http.routers.api.entrypoints=web,secure"
-      - "traefik.http.routers.api.middlewares=http-ratelimit@file,secHeaders@file,api_auth"
+      - "traefik.http.routers.api.middlewares=http-ratelimit@file,secHeaders@file"
       - "traefik.http.routers.api.rule=Host(`vt.ackerson.de`)"
       - "traefik.http.routers.api.service=api@internal"
       - "traefik.http.routers.api.tls.certResolver=letsencrypt"

@@ -8,6 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      CTX_DIGITALOCEAN_DNS_TOKEN: ${{ secrets.CTX_DIGITALOCEAN_DNS_TOKEN }}
       CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN: ${{ secrets.CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN }}
       CTX_DIGITALOCEAN_FIREWALL: ${{ secrets.CTX_DIGITALOCEAN_FIREWALL }}
       CTX_SSH_DEPLOY_FINGERPRINT: ${{ secrets.CTX_SSH_DEPLOY_FINGERPRINT }}
@@ -32,7 +33,7 @@ jobs:
           go build do.go
           cd ../
 
-          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME}' < docker-compose.yml > docker-compose-deploy.yml
+          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME} ${CTX_DIGITALOCEAN_DNS_TOKEN}' < docker-compose.yml > docker-compose-deploy.yml
 
           cat <<DEPLOY_EOF >deploy-vpnission.sh
           #!/usr/bin/bash
