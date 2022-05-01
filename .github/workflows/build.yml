@@ -12,6 +12,7 @@ jobs:
       CTX_DIGITALOCEAN_FIREWALL: ${{ secrets.CTX_DIGITALOCEAN_FIREWALL }}
       CTX_SSH_DEPLOY_FINGERPRINT: ${{ secrets.CTX_SSH_DEPLOY_FINGERPRINT }}
       SSH_CXN: ${{ secrets.CTX_IPV6_SLAVE_HOME }}
+      TRANSMISSION_HOST_NAME: ${{ secrets.TRANSMISSION_HOST_NAME }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
@@ -33,22 +34,20 @@ jobs:
           go build do.go
           cd ../
 
-          echo "GITHUB_RUN_ID=$GITHUB_RUN_ID" > vpnission.env.list
-          echo "TRANSMISSION_HOST_NAME=${{ secrets.TRANSMISSION_HOST_NAME }}" >> vpnission.env.list
+          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME}' < docker-compose.yml > docker-compose.yml
 
           cat <<DEPLOY_EOF >deploy-vpnission.sh
           #!/usr/bin/bash
-          scp -o StrictHostKeyChecking=no vpnission.env.list ubuntu@$SSH_CXN:~/.config/
-          ssh ubuntu@$SSH_CXN << EOF
-            sudo docker rm -f vpnission || true
-            sudo docker pull danackerson/vpnission
-            sudo docker run --env-file .config/vpnission.env.list -d --restart always \
-              --name vpnission --privileged -p9091:9091 -p51413:51413 \
-              -v /etc/wireguard:/etc/wireguard -v /mnt/usb4TB/DLNA/torrents:/mnt/torrents \
-              danackerson/vpnission:vg$GITHUB_RUN_ID
-          EOF
+          ssh -o StrictHostKeyChecking=no ubuntu@SSH_CXN mkdir -p vpnission traefik/logs
+          scp docker-compose.yml ubuntu@SSH_CXN:~/vpnission
+          ssh ubuntu@chore.ackerson.de '\
+            curl -o traefik/dynamic_conf.yml https://raw.githubusercontent.com/ackersonde/digitaloceans/main/scripts/dynamic_conf.yml
+            docker-compose -f ./vpnission/docker-compose.yml down && \
+            docker-compose -f ./vpnission/docker-compose.yml pull && \
+            docker-compose -f ./vpnission/docker-compose.yml up -d
+          '
           DEPLOY_EOF
-          chmod 700 deploy-vpnission.sh
+          chmod u+x deploy-vpnission.sh
 
           mkdir ~/.ssh
           cat <<EOF >~/.ssh/id_rsa
@@ -59,11 +58,11 @@ jobs:
           public_ip_address=$(curl -s https://checkip.amazonaws.com)
           ./digitaloceans/do -fn=firewallSSH -allow=true -ip=$public_ip_address -tag=traefik
 
-          scp -o StrictHostKeyChecking=no vpnission.env.list deploy-vpnission.sh root@ackerson.de:~/
+          scp -o StrictHostKeyChecking=no deploy-vpnission.sh docker-compose.yml root@ackerson.de:~/
           ssh root@ackerson.de ./deploy-vpnission.sh
-          ssh root@ackerson.de rm vpnission.env.list deploy-vpnission.sh
+          ssh root@ackerson.de rm deploy-vpnission.sh docker-compose.yml
 
-          rm -Rf .ssh/ deploy-vpnission.sh vpnission.env.list
+          rm -Rf .ssh/ deploy-vpnission.sh
           ./digitaloceans/do -fn=firewallSSH -allow=false -ip=$public_ip_address
 
           curl -s -o /dev/null -X POST -d token=${{ secrets.CTX_SLACK_NOTIFICATIONS_TOKEN }} -d channel=C092UE0H4 \

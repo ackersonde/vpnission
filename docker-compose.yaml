@@ -1,0 +1,68 @@
+version: '3.5'
+
+services:
+  ## vpnission (transmission-daemon + proton wireguard VPN)
+  vpnission:
+    restart: unless-stopped
+    image: danackerson/vpnission:latest
+    privileged: true
+    container_name: vpnission
+    environment:
+      - GITHUB_RUN_ID=$GITHUB_RUN_ID
+      - TRANSMISSION_HOST_NAME=$TRANSMISSION_HOST_NAME
+    volumes:
+      - "/etc/wireguard:/etc/wireguard"
+      - "/mnt/usb4TB/DLNA/torrents:/mnt/torrents"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vpnission.tls.certResolver=letsencrypt"
+      - "traefik.http.routers.vpnission.tls.domains=$TRANSMISSION_HOST_NAME"
+      - "traefik.http.routers.vpnission.rule=Host(`$TRANSMISSION_HOST_NAME`)"
+      - "traefik.http.routers.vpnission.middlewares=http-ratelimit@file,secHeaders@file"
+      - "traefik.http.routers.vpnission.service=vpnission-svc"
+      - "traefik.http.services.vpnission-svc.loadbalancer.server.port=9091"
+    ports:
+      - "9091:9091"
+      - "51413:51413"
+
+  ## Traefik Server
+  traefik:
+    restart: unless-stopped
+    image: traefik:2.6
+    container_name: traefik
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "~/traefik/logs:/var/log/traefik/"
+      - "~/traefik/acme.json:/acme.json:ro"
+      - "~/traefik/dynamic_conf.yml:/dynamic_conf.yml"
+      - "~/traefik/usersFile:/usersFile"
+    command:
+      - "--api"
+      - "--accesslog.filepath=/var/log/traefik/access.log"
+      - "--log.filepath=/var/log/traefik/traefik.log"
+      - "--log.level=WARN"
+      - "--providers.docker.exposedByDefault=false"
+      - "--providers.file.filename=/dynamic_conf.yml"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.secure.address=:443"
+      - "--certificatesResolvers.letsencrypt.acme.email=dan@ackerson.de"
+      - "--certificatesResolvers.letsencrypt.acme.storage=acme.json"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.api_auth.basicauth.usersfile=/usersFile"
+      - "traefik.http.routers.api.entrypoints=web,secure"
+      - "traefik.http.routers.api.middlewares=http-ratelimit@file,secHeaders@file,api_auth"
+      - "traefik.http.routers.api.rule=Host(`ht.ackerson.de`)"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.api.tls.certResolver=letsencrypt"
+      - "traefik.http.routers.api.tls.domains=ht.ackerson.de"
+      - "traefik.http.routers.https-redirect.rule=HostRegexp(`{any:.*}`)"
+      - "traefik.http.routers.https-redirect.middlewares=https-redirect@docker"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.port=443"
+    ports:
+      - "80:80"
+      - "443:443"
+
+

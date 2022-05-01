@@ -16,4 +16,4 @@ EXPOSE 9091 51413
 ADD scripts/start.sh /root/
 ENTRYPOINT ["/root/start.sh"]
 
-# test torrent: http://www.frostclick.com/torrents/video/animation/Big_Buck_Bunny_1080p_surround_frostclick.com_frostwire.com.torrent
+# test torrent: https://releases.ubuntu.com/22.04/ubuntu-22.04-desktop-amd64.iso.torrent
