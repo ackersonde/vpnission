@@ -32,17 +32,17 @@ jobs:
           go build do.go
           cd ../
 
-          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME}' < docker-compose.yml > docker-compose.yml
+          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME}' < docker-compose.yml > docker-compose-deploy.yml
 
           cat <<DEPLOY_EOF >deploy-vpnission.sh
           #!/usr/bin/bash
           ssh -o StrictHostKeyChecking=no ubuntu@$SSH_CXN mkdir -p vpnission traefik/logs
-          scp docker-compose.yml ubuntu@$SSH_CXN:~/vpnission
+          scp docker-compose-deploy.yml ubuntu@$SSH_CXN:~/vpnission
           ssh ubuntu@$SSH_CXN '\
             curl -o traefik/dynamic_conf.yml https://raw.githubusercontent.com/ackersonde/digitaloceans/main/scripts/dynamic_conf.yml
-            docker compose -f ./vpnission/docker-compose.yml down && \
-            docker compose -f ./vpnission/docker-compose.yml pull && \
-            docker compose -f ./vpnission/docker-compose.yml up -d
+            docker compose -f ./vpnission/docker-compose-deploy.yml down && \
+            docker compose -f ./vpnission/docker-compose-deploy.yml pull && \
+            docker compose -f ./vpnission/docker-compose-deploy.yml up -d
           '
           DEPLOY_EOF
           chmod u+x deploy-vpnission.sh
@@ -56,9 +56,9 @@ jobs:
           public_ip_address=$(curl -s https://checkip.amazonaws.com)
           ./digitaloceans/do -fn=firewallSSH -allow=true -ip=$public_ip_address -tag=traefik
 
-          scp -o StrictHostKeyChecking=no deploy-vpnission.sh docker-compose.yml root@ackerson.de:~/
+          scp -o StrictHostKeyChecking=no deploy-vpnission.sh docker-compose-deploy.yml root@ackerson.de:~/
           ssh root@ackerson.de ./deploy-vpnission.sh
-          ssh root@ackerson.de rm deploy-vpnission.sh docker-compose.yml
+          ssh root@ackerson.de rm deploy-vpnission.sh docker-compose-deploy.yml
 
           rm -Rf .ssh/ deploy-vpnission.sh
           ./digitaloceans/do -fn=firewallSSH -allow=false -ip=$public_ip_address
