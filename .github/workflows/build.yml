@@ -42,9 +42,9 @@ jobs:
           scp docker-compose.yml ubuntu@SSH_CXN:~/vpnission
           ssh ubuntu@chore.ackerson.de '\
             curl -o traefik/dynamic_conf.yml https://raw.githubusercontent.com/ackersonde/digitaloceans/main/scripts/dynamic_conf.yml
-            docker-compose -f ./vpnission/docker-compose.yml down && \
-            docker-compose -f ./vpnission/docker-compose.yml pull && \
-            docker-compose -f ./vpnission/docker-compose.yml up -d
+            docker compose -f ./vpnission/docker-compose.yml down && \
+            docker compose -f ./vpnission/docker-compose.yml pull && \
+            docker compose -f ./vpnission/docker-compose.yml up -d
           '
           DEPLOY_EOF
           chmod u+x deploy-vpnission.sh
