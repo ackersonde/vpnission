@@ -2,13 +2,13 @@ name: Deploy Transmission under IPSec
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, wireguard ]
   workflow_dispatch:
     inputs:
       protonvpn_server:
-        description: 'Which wireguard config to use'
+        description: 'Which VPN config to use'
         required: false
-        default: 'NL_1'
+        default: '138.199.7.129'
 
 jobs:
   build:
@@ -19,6 +19,8 @@ jobs:
       CTX_DIGITALOCEAN_FIREWALL: ${{ secrets.CTX_DIGITALOCEAN_FIREWALL }}
       CTX_SSH_DEPLOY_FINGERPRINT: ${{ secrets.CTX_SSH_DEPLOY_FINGERPRINT }}
       SSH_CXN: ${{ secrets.CTX_IPV6_SLAVE_HOME }}
+      CTX_VPN_EAP_ID: ${{ secrets.CTX_VPN_EAP_ID }}
+      CTX_VPN_SECRET: ${{ secrets.CTX_VPN_SECRET }}
       TRANSMISSION_HOST_NAME: ${{ secrets.TRANSMISSION_HOST_NAME }}
       PROTONVPN_SERVER:  ${{ github.event.inputs.protonvpn_server }}
     steps:
@@ -41,9 +43,9 @@ jobs:
           cd ../
 
           if [[ -z $PROTONVPN_SERVER ]]; then
-            PROTONVPN_SERVER="DE_81"
+            PROTONVPN_SERVER="138.199.7.129"
           fi
-          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME} ${PROTONVPN_SERVER} ${CTX_DIGITALOCEAN_DNS_TOKEN}' < docker-compose.yml > docker-compose-deploy.yml
+          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME} ${PROTONVPN_SERVER} ${CTX_DIGITALOCEAN_DNS_TOKEN} ${CTX_VPN_EAP_ID} ${CTX_VPN_SECRET}' < docker-compose.yml > docker-compose-deploy.yml
 
           cat <<DEPLOY_EOF >deploy-vpnission.sh
           #!/usr/bin/bash
@@ -71,7 +73,7 @@ jobs:
           ssh root@ackerson.de ./deploy-vpnission.sh
           ssh root@ackerson.de rm deploy-vpnission.sh docker-compose-deploy.yml
 
-          rm -Rf .ssh/ deploy-vpnission.sh
+          rm -Rf .ssh/ deploy-vpnission.sh docker-compose-deploy.yml
           ./digitaloceans/do -fn=firewallSSH -allow=false -ip=$public_ip_address
 
           curl -s -o /dev/null -X POST -d token=${{ secrets.CTX_SLACK_NOTIFICATIONS_TOKEN }} -d channel=C092UE0H4 \

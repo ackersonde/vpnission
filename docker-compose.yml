@@ -1,15 +1,19 @@
 version: '3.5'
 
 services:
-  ## vpnission (transmission-daemon + proton wireguard VPN)
+  ## vpnission (transmission-daemon + proton VPN)
   vpnission:
     restart: unless-stopped
     image: danackerson/vpnission:latest
     privileged: true
     container_name: vpnission
+    cap_add:
+      - NET_ADMIN
     environment:
       - GITHUB_RUN_ID=$GITHUB_RUN_ID
       - TRANSMISSION_HOST_NAME=$TRANSMISSION_HOST_NAME
+      - CTX_VPN_EAP_ID=$CTX_VPN_EAP_ID
+      - CTX_VPN_SECRET=$CTX_VPN_SECRET
       - PROTONVPN_SERVER=$PROTONVPN_SERVER
     volumes:
       - "/etc/wireguard:/etc/wireguard"
