@@ -3,6 +3,12 @@ name: Deploy Transmission under IPSec
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      protonvpn_server:
+        description: 'Which wireguard config to use'
+        required: false
+        default: 'NL_1'
 
 jobs:
   build:
@@ -14,6 +20,7 @@ jobs:
       CTX_SSH_DEPLOY_FINGERPRINT: ${{ secrets.CTX_SSH_DEPLOY_FINGERPRINT }}
       SSH_CXN: ${{ secrets.CTX_IPV6_SLAVE_HOME }}
       TRANSMISSION_HOST_NAME: ${{ secrets.TRANSMISSION_HOST_NAME }}
+      PROTONVPN_SERVER: ${{ github.event.inputs.protonvpn_server }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2

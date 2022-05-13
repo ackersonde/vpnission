@@ -10,6 +10,7 @@ services:
     environment:
       - GITHUB_RUN_ID=$GITHUB_RUN_ID
       - TRANSMISSION_HOST_NAME=$TRANSMISSION_HOST_NAME
+      - PROTONVPN_SERVER=$PROTONVPN_SERVER
     volumes:
       - "/etc/wireguard:/etc/wireguard"
       - "/mnt/usb4TB/DLNA/torrents:/mnt/torrents"
@@ -44,7 +45,7 @@ services:
   ## Traefik Server
   traefik:
     restart: unless-stopped
-    image: traefik:2.6
+    image: traefik:2.7
     container_name: traefik
     environment:
       - DO_AUTH_TOKEN=$CTX_DIGITALOCEAN_DNS_TOKEN \

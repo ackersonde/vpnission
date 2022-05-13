@@ -13,7 +13,8 @@ RUN chmod u+x /root/finished_torrent.sh
 
 EXPOSE 9091 51413
 
+ENV PROTONVPN_SERVER=$PROTONVPN_SERVER
 ADD scripts/start.sh /root/
-ENTRYPOINT ["/root/start.sh"]
+ENTRYPOINT ["/root/start.sh", "$PROTONVPN_SERVER"]
 
 # test torrent: https://releases.ubuntu.com/22.04/ubuntu-22.04-desktop-amd64.iso.torrent
