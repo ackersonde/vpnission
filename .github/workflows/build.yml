@@ -1,5 +1,11 @@
 name: Deploy Transmission under IPSec
 
+inputs:
+  protonvpn_server:
+    description: 'Which wireguard config to use'
+    required: false
+    default: 'NL_1'
+
 on:
   push:
     branches: [ main ]
