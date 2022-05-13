@@ -3,13 +3,6 @@ name: Deploy Transmission under IPSec
 on:
   push:
     branches: [ main ]
-  workflow_call:
-    inputs:
-      protonvpn_server:
-        description: 'Which wireguard config to use'
-        required: false
-        default: 'NL_1'
-        type: string
   workflow_dispatch:
     inputs:
       protonvpn_server:
@@ -47,6 +40,9 @@ jobs:
           go build do.go
           cd ../
 
+          if [[ -z $PROTONVPN_SERVER ]]; then
+            PROTONVPN_SERVER="DE_81"
+          fi
           envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME} ${PROTONVPN_SERVER} ${CTX_DIGITALOCEAN_DNS_TOKEN}' < docker-compose.yml > docker-compose-deploy.yml
 
           cat <<DEPLOY_EOF >deploy-vpnission.sh
