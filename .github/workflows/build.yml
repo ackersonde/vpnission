@@ -20,7 +20,7 @@ jobs:
       CTX_SSH_DEPLOY_FINGERPRINT: ${{ secrets.CTX_SSH_DEPLOY_FINGERPRINT }}
       SSH_CXN: ${{ secrets.CTX_IPV6_SLAVE_HOME }}
       TRANSMISSION_HOST_NAME: ${{ secrets.TRANSMISSION_HOST_NAME }}
-      PROTONVPN_SERVER: ${{ github.event.inputs.protonvpn_server }}
+      PROTONVPN_SERVER:  ${{ github.event.inputs.protonvpn_server }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
@@ -40,7 +40,7 @@ jobs:
           go build do.go
           cd ../
 
-          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME} ${CTX_DIGITALOCEAN_DNS_TOKEN}' < docker-compose.yml > docker-compose-deploy.yml
+          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME} ${PROTONVPN_SERVER} ${CTX_DIGITALOCEAN_DNS_TOKEN}' < docker-compose.yml > docker-compose-deploy.yml
 
           cat <<DEPLOY_EOF >deploy-vpnission.sh
           #!/usr/bin/bash

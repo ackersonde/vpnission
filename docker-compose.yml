@@ -10,6 +10,7 @@ services:
     environment:
       - GITHUB_RUN_ID=$GITHUB_RUN_ID
       - TRANSMISSION_HOST_NAME=$TRANSMISSION_HOST_NAME
+      - PROTONVPN_SERVER=$PROTONVPN_SERVER
     volumes:
       - "/etc/wireguard:/etc/wireguard"
       - "/mnt/usb4TB/DLNA/torrents:/mnt/torrents"
