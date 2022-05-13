@@ -7,6 +7,8 @@ services:
     image: danackerson/vpnission:latest
     privileged: true
     container_name: vpnission
+    cap_add:
+      - NET_ADMIN
     environment:
       - GITHUB_RUN_ID=$GITHUB_RUN_ID
       - TRANSMISSION_HOST_NAME=$TRANSMISSION_HOST_NAME

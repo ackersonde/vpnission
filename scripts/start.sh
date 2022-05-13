@@ -4,7 +4,7 @@
 PROTONVPN_SERVER=$@
 if [ -z $@ ]
 then
-    PROTONVPN_SERVER=nl-10.protonvpn.com
+    PROTONVPN_SERVER=138.199.7.129
 fi
 
 sed -i -e "s/{{VPN_SERVER}}/$PROTONVPN_SERVER/" /etc/swanctl/conf.d/protonvpn.conf
