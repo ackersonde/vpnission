@@ -41,7 +41,7 @@ jobs:
           cd ../
 
           if [[ -z $PROTONVPN_SERVER ]]; then
-            PROTONVPN_SERVER="DE_81"
+            PROTONVPN_SERVER="NL_88"
           fi
           envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME} ${PROTONVPN_SERVER} ${CTX_DIGITALOCEAN_DNS_TOKEN}' < docker-compose.yml > docker-compose-deploy.yml
 
