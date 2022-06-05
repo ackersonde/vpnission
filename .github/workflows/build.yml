@@ -8,7 +8,7 @@ on:
       protonvpn_server:
         description: 'Which VPN config to use'
         required: false
-        default: '138.199.7.129'
+        default: 'nl-10.protonvpn.com'
 
 jobs:
   build:
@@ -43,7 +43,7 @@ jobs:
           cd ../
 
           if [[ -z $PROTONVPN_SERVER ]]; then
-            PROTONVPN_SERVER="138.199.7.129"
+            PROTONVPN_SERVER="nl-10.protonvpn.com"
           fi
           envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME} ${PROTONVPN_SERVER} ${CTX_DIGITALOCEAN_DNS_TOKEN} ${CTX_VPN_EAP_ID} ${CTX_VPN_SECRET}' < docker-compose.yml > docker-compose-deploy.yml
 

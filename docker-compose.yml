@@ -16,7 +16,6 @@ services:
       - CTX_VPN_SECRET=$CTX_VPN_SECRET
       - PROTONVPN_SERVER=$PROTONVPN_SERVER
     volumes:
-      - "/etc/wireguard:/etc/wireguard"
       - "/mnt/usb4TB/DLNA/torrents:/mnt/torrents"
     labels:
       - "traefik.enable=true"

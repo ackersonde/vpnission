@@ -12,6 +12,7 @@ ADD scripts/finished_torrent.sh /root/
 RUN chmod u+x /root/finished_torrent.sh
 
 EXPOSE 9091
+EXPOSE 51413
 
 # IPsec stuff
 #RUN echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
