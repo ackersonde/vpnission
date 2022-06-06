@@ -17,6 +17,7 @@ services:
       - PROTONVPN_SERVER=$PROTONVPN_SERVER
     volumes:
       - "/mnt/usb4TB/DLNA/torrents:/mnt/torrents"
+      - "/lib/modules:/lib/modules"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.vpnission.tls.certResolver=letsencrypt"
