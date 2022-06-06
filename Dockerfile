@@ -11,7 +11,7 @@ ADD config/settings.json /root/.config/transmission-daemon/
 ADD scripts/finished_torrent.sh /root/
 RUN chmod u+x /root/finished_torrent.sh
 
-EXPOSE 9091 51413
+EXPOSE 9091 51413 51413/udp
 
 RUN echo "net.core.rmem_max=4194304" >> /etc/sysctl.conf
 RUN echo "net.core.wmem_max=1048576" >> /etc/sysctl.conf
