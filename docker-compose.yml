@@ -48,7 +48,7 @@ services:
   ## Traefik Server
   traefik:
     restart: unless-stopped
-    image: traefik:2.7
+    image: traefik:2.8
     container_name: traefik
     environment:
       - DO_AUTH_TOKEN=$CTX_DIGITALOCEAN_DNS_TOKEN \
@@ -59,7 +59,7 @@ services:
       - "~/traefik/dynamic_conf.yml:/dynamic_conf.yml"
       - "~/traefik/usersFile:/usersFile"
     command:
-      - "--api.dashboard=false"
+      - "--api.dashboard=true"
       - "--accesslog.filepath=/var/log/traefik/access.log"
       - "--log.filepath=/var/log/traefik/traefik.log"
       - "--log.level=WARN"
