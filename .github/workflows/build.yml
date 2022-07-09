@@ -14,11 +14,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      CTX_DIGITALOCEAN_DNS_TOKEN: ${{ secrets.CTX_DIGITALOCEAN_DNS_TOKEN }}
-      CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN: ${{ secrets.CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN }}
-      CTX_DIGITALOCEAN_FIREWALL: ${{ secrets.CTX_DIGITALOCEAN_FIREWALL }}
-      CTX_SSH_DEPLOY_FINGERPRINT: ${{ secrets.CTX_SSH_DEPLOY_FINGERPRINT }}
-      SSH_CXN: ${{ secrets.CTX_IPV6_SLAVE_HOME }}
       TRANSMISSION_HOST_NAME: ${{ secrets.TRANSMISSION_HOST_NAME }}
       PROTONVPN_SERVER:  ${{ github.event.inputs.protonvpn_server }}
     steps:
@@ -29,11 +24,18 @@ jobs:
           docker run --rm --privileged multiarch/qemu-user-static:register
           docker build --compress -t danackerson/vpnission:vg$GITHUB_RUN_ID .
 
-          docker login -u ${{ secrets.CTX_DOCKER_USER }} -p ${{ secrets.CTX_DOCKER_PASS }}
+          export DUSER=$(echo ${{ secrets.ORG_DOCKER_USER }} | base64 -d)
+          export DPASS=$(echo ${{ secrets.ORG_DOCKER_PASS }} | base64 -d)
+          docker login -u $DUSER -p $DPASS
+
           docker tag danackerson/vpnission:vg$GITHUB_RUN_ID danackerson/vpnission:latest
           docker push danackerson/vpnission:vg$GITHUB_RUN_ID
           docker push danackerson/vpnission:latest
 
+
+          export ORG_DIGITALOCEAN_DNS_TOKEN: ${{ secrets.ORG_DIGITALOCEAN_DNS_TOKEN }}
+          export CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN=$(echo ${{ secrets.ORG_DIGITALOCEAN_DROPLET_PROXY_TOKEN }} | base64 -d)
+          export CTX_DIGITALOCEAN_FIREWALL=$(echo ${{ secrets.ORG_DIGITALOCEAN_FIREWALL }} | base64 -d)
           git clone https://github.com/ackersonde/digitaloceans.git
           cd digitaloceans
           go get -t -d -v ./...
@@ -43,7 +45,9 @@ jobs:
           if [[ -z $PROTONVPN_SERVER ]]; then
             PROTONVPN_SERVER="NL_88"
           fi
-          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME} ${PROTONVPN_SERVER} ${CTX_DIGITALOCEAN_DNS_TOKEN}' < docker-compose.yml > docker-compose-deploy.yml
+          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME} ${PROTONVPN_SERVER} ${ORG_DIGITALOCEAN_DNS_TOKEN}' < docker-compose.yml > docker-compose-deploy.yml
+
+          export SSH_CXN=$(echo ${{ secrets.ORG_IPV6_SLAVE_HOME }} | base64 -d)
 
           cat <<DEPLOY_EOF >deploy-vpnission.sh
           #!/usr/bin/bash
@@ -60,7 +64,7 @@ jobs:
 
           mkdir ~/.ssh
           cat <<EOF >~/.ssh/id_rsa
-          ${{ secrets.CTX_DIGITALOCEAN_SSH_PRIVKEY }}
+          $(echo ${{ secrets.ORG_DIGITALOCEAN_SSH_PRIVKEY }} | base64 -d)
           EOF
           chmod 400 ~/.ssh/id_rsa
 
@@ -71,9 +75,10 @@ jobs:
           ssh root@ackerson.de ./deploy-vpnission.sh
           ssh root@ackerson.de rm deploy-vpnission.sh docker-compose-deploy.yml
 
-          rm -Rf .ssh/ deploy-vpnission.sh
+          rm -Rf .ssh/ .docker/ deploy-vpnission.sh
           ./digitaloceans/do -fn=firewallSSH -allow=false -ip=$public_ip_address
 
-          curl -s -o /dev/null -X POST -d token=${{ secrets.CTX_SLACK_NOTIFICATIONS_TOKEN }} -d channel=C092UE0H4 \
+          export SLACK_NOTIFY_TOKEN=$(echo ${{ secrets.ORG_SLACK_NOTIFICATIONS_TOKEN }} | base64 -d)
+          curl -s -o /dev/null -X POST -d token=$SLACK_NOTIFY_TOKEN -d channel=C092UE0H4 \
             -d text="<https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|$GITHUB_REPOSITORY @ $GITHUB_RUN_ID>" \
             https://slack.com/api/chat.postMessage

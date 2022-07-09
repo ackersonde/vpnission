@@ -51,7 +51,7 @@ services:
     image: traefik:2.8
     container_name: traefik
     environment:
-      - DO_AUTH_TOKEN=$CTX_DIGITALOCEAN_DNS_TOKEN \
+      - DO_AUTH_TOKEN=$ORG_DIGITALOCEAN_DNS_TOKEN \
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "~/traefik/logs:/var/log/traefik/"
