@@ -52,7 +52,7 @@ jobs:
           #!/usr/bin/bash
           ssh -o StrictHostKeyChecking=no ubuntu@$SSH_CXN mkdir -p vpnission traefik/logs
           scp docker-compose-deploy.yml ubuntu@[$SSH_CXN]:~/vpnission
-          ssh ubuntu@[$SSH_CXN] '\
+          ssh ubuntu@$SSH_CXN '\
             curl -o traefik/dynamic_conf.yml https://raw.githubusercontent.com/ackersonde/digitaloceans/main/scripts/dynamic_conf.yml
             docker compose -f ./vpnission/docker-compose-deploy.yml down && \
             docker compose -f ./vpnission/docker-compose-deploy.yml pull && \
