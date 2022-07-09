@@ -32,7 +32,6 @@ jobs:
           docker push danackerson/vpnission:vg$GITHUB_RUN_ID
           docker push danackerson/vpnission:latest
 
-
           export ORG_DIGITALOCEAN_DNS_TOKEN=$(echo ${{ secrets.ORG_DIGITALOCEAN_DNS_TOKEN }} | base64 -d)
           export CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN=$(echo ${{ secrets.ORG_DIGITALOCEAN_DROPLET_PROXY_TOKEN }} | base64 -d)
           export CTX_DIGITALOCEAN_FIREWALL=$(echo ${{ secrets.ORG_DIGITALOCEAN_FIREWALL }} | base64 -d)
@@ -52,8 +51,8 @@ jobs:
           cat <<DEPLOY_EOF >deploy-vpnission.sh
           #!/usr/bin/bash
           ssh -o StrictHostKeyChecking=no ubuntu@$SSH_CXN mkdir -p vpnission traefik/logs
-          scp docker-compose-deploy.yml ubuntu@$SSH_CXN:~/vpnission
-          ssh ubuntu@$SSH_CXN '\
+          scp docker-compose-deploy.yml ubuntu@[$SSH_CXN]:~/vpnission
+          ssh ubuntu@[$SSH_CXN] '\
             curl -o traefik/dynamic_conf.yml https://raw.githubusercontent.com/ackersonde/digitaloceans/main/scripts/dynamic_conf.yml
             docker compose -f ./vpnission/docker-compose-deploy.yml down && \
             docker compose -f ./vpnission/docker-compose-deploy.yml pull && \
