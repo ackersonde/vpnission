@@ -1,19 +1,15 @@
 version: '3.5'
 
 services:
-  ## vpnission (transmission-daemon + proton VPN)
+  ## vpnission (transmission-daemon + proton wireguard VPN)
   vpnission:
     restart: unless-stopped
     image: danackerson/vpnission:latest
     privileged: true
     container_name: vpnission
-    cap_add:
-      - NET_ADMIN
     environment:
       - GITHUB_RUN_ID=$GITHUB_RUN_ID
       - TRANSMISSION_HOST_NAME=$TRANSMISSION_HOST_NAME
-      - CTX_VPN_EAP_ID=$CTX_VPN_EAP_ID
-      - CTX_VPN_SECRET=$CTX_VPN_SECRET
       - PROTONVPN_SERVER=$PROTONVPN_SERVER
     volumes:
       - "/mnt/usb4TB/DLNA/torrents:/mnt/torrents"
@@ -29,6 +25,9 @@ services:
     ports:
       - "9091:9091"
       - "51413:51413"
+      - "51413:51413/udp"
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
 
   ## jelly (https://jellyfin.org/docs/general/administration/installing.html)
   jelly:
@@ -49,10 +48,10 @@ services:
   ## Traefik Server
   traefik:
     restart: unless-stopped
-    image: traefik:2.7
+    image: traefik:2.8
     container_name: traefik
     environment:
-      - DO_AUTH_TOKEN=$CTX_DIGITALOCEAN_DNS_TOKEN \
+      - DO_AUTH_TOKEN=$ORG_DIGITALOCEAN_DNS_TOKEN \
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "~/traefik/logs:/var/log/traefik/"
