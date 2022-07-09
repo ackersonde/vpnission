@@ -14,7 +14,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      TRANSMISSION_HOST_NAME: ${{ secrets.TRANSMISSION_HOST_NAME }}
       PROTONVPN_SERVER:  ${{ github.event.inputs.protonvpn_server }}
     steps:
       - uses: actions/checkout@v2
@@ -32,6 +31,7 @@ jobs:
           docker push danackerson/vpnission:vg$GITHUB_RUN_ID
           docker push danackerson/vpnission:latest
 
+          export TRANSMISSION_HOST_NAME=$(echo ${{ secrets.ORG_TRANSMISSION_HOST_NAME }} | base64 -d)
           export ORG_DIGITALOCEAN_DNS_TOKEN=$(echo ${{ secrets.ORG_DIGITALOCEAN_DNS_TOKEN }} | base64 -d)
           export CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN=$(echo ${{ secrets.ORG_DIGITALOCEAN_DROPLET_PROXY_TOKEN }} | base64 -d)
           export CTX_DIGITALOCEAN_FIREWALL=$(echo ${{ secrets.ORG_DIGITALOCEAN_FIREWALL }} | base64 -d)
