@@ -37,7 +37,7 @@ jobs:
           export CTX_DIGITALOCEAN_FIREWALL=$(echo ${{ secrets.ORG_DIGITALOCEAN_FIREWALL }} | base64 -d)
           git clone https://github.com/ackersonde/digitaloceans.git
           cd digitaloceans
-          go get -t -d -v ./...
+          go mod tidy
           go build do.go
           cd ../
 
