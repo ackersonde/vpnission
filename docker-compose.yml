@@ -43,7 +43,7 @@ services:
       - "traefik.http.routers.jelly.tls.certResolver=letsencrypt"
       - "traefik.http.routers.jelly.tls.domains=jelly.ackerson.de"
       - "traefik.http.routers.jelly.rule=Host(`jelly.ackerson.de`)"
-      - "traefik.http.routers.jelly.middlewares=http-ratelimit@file,secHeaders@file"
+      - "traefik.http.routers.jelly.middlewares=secHeaders@file"
 
   ## Traefik Server
   traefik:
