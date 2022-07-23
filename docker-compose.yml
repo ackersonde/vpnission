@@ -16,7 +16,6 @@ services:
       - "/lib/modules:/lib/modules"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.vpnission.tls.certResolver=letsencrypt"
       - "traefik.http.routers.vpnission.tls.domains=$TRANSMISSION_HOST_NAME"
       - "traefik.http.routers.vpnission.rule=Host(`$TRANSMISSION_HOST_NAME`)"
       - "traefik.http.routers.vpnission.middlewares=http-ratelimit@file,secHeaders@file"
@@ -40,7 +39,6 @@ services:
       - "/mnt/usb4TB/DLNA:/media"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.jelly.tls.certResolver=letsencrypt"
       - "traefik.http.routers.jelly.tls.domains=jelly.ackerson.de"
       - "traefik.http.routers.jelly.rule=Host(`jelly.ackerson.de`)"
       - "traefik.http.routers.jelly.middlewares=secHeaders@file"
@@ -50,12 +48,11 @@ services:
     restart: unless-stopped
     image: traefik:2.8
     container_name: traefik
-    environment:
-      - DO_AUTH_TOKEN=$ORG_DIGITALOCEAN_DNS_TOKEN \
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "~/traefik/logs:/var/log/traefik/"
-      - "~/traefik/acme.json:/acme.json:ro"
+      - "~/traefik/dump/certs/*.ackerson.de.crt:/certs/ackde.crt"
+      - "~/traefik/dump/private/*.ackerson.de.key:/keys/ackde.key"
       - "~/traefik/dynamic_conf.yml:/dynamic_conf.yml"
       - "~/traefik/usersFile:/usersFile"
     command:
@@ -66,8 +63,6 @@ services:
       - "--providers.file.filename=/dynamic_conf.yml"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.secure.address=:443"
-      - "--certificatesResolvers.letsencrypt.acme.email=dan@ackerson.de"
-      - "--certificatesResolvers.letsencrypt.acme.storage=acme.json"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.https-redirect.rule=HostRegexp(`{any:.*}`)"
