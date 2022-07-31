@@ -15,7 +15,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      PROTONVPN_SERVER:  ${{ github.event.inputs.protonvpn_server }}
+      PROTONVPN_SERVER: "${{ github.event.inputs.protonvpn_server }}"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
@@ -55,12 +55,11 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@$SSH_CXN mkdir -p vpnission traefik/logs
           scp docker-compose-deploy.yml ubuntu@[$SSH_CXN]:~/vpnission
           ssh ubuntu@$SSH_CXN '\
-            curl -o traefik/dynamic_conf.yml https://raw.githubusercontent.com/ackersonde/hetzner_home/main/scripts/dynamic_conf.yml && \
-            export PROTON_SERVER=$PROTONVPN_SERVER && \
-            docker compose -f ./vpnission/docker-compose-deploy.yml down && \
-            docker compose -f ./vpnission/docker-compose-deploy.yml pull && \
-            docker compose -f ./vpnission/docker-compose-deploy.yml up -d
-          '
+          curl -o traefik/dynamic_conf.yml https://raw.githubusercontent.com/ackersonde/hetzner_home/main/scripts/dynamic_conf.yml && \
+          export PROTONVPN_SERVER=$PROTONVPN_SERVER && \
+          docker compose -f ./vpnission/docker-compose-deploy.yml down && \
+          docker compose -f ./vpnission/docker-compose-deploy.yml pull && \
+          docker compose -f ./vpnission/docker-compose-deploy.yml up -d'
           DEPLOY_EOF
           chmod u+x deploy-vpnission.sh
 
@@ -73,7 +72,7 @@ jobs:
 
           scp -o StrictHostKeyChecking=no deploy-vpnission.sh docker-compose-deploy.yml root@ackerson.de:~/
           ssh root@ackerson.de ./deploy-vpnission.sh
-          #ssh root@ackerson.de rm deploy-vpnission.sh docker-compose-deploy.yml
+          ssh root@ackerson.de rm deploy-vpnission.sh docker-compose-deploy.yml
 
           rm -Rf .ssh/ .docker/ deploy-vpnission.sh
           ./hetzner_home/hetzner -fn=cleanupDeploy -tag=homepage
