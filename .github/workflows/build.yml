@@ -45,7 +45,7 @@ jobs:
           if [[ -z $PROTONVPN_SERVER ]]; then
             PROTONVPN_SERVER="NL_88"
           fi
-          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME} ${PROTONVPN_SERVER}' < docker-compose.yml > docker-compose-deploy.yml
+          envsubst '${GITHUB_RUN_ID} ${TRANSMISSION_HOST_NAME}' < docker-compose.yml > docker-compose-deploy.yml
 
           export SSH_CXN=$(echo ${{ secrets.ORG_IPV6_SLAVE_HOME }} | base64 -d)
 
@@ -54,7 +54,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@$SSH_CXN mkdir -p vpnission traefik/logs
           scp docker-compose-deploy.yml ubuntu@[$SSH_CXN]:~/vpnission
           ssh ubuntu@$SSH_CXN '\
-            curl -o traefik/dynamic_conf.yml https://raw.githubusercontent.com/ackersonde/hetzner_home/main/scripts/dynamic_conf.yml
+            curl -o traefik/dynamic_conf.yml https://raw.githubusercontent.com/ackersonde/hetzner_home/main/scripts/dynamic_conf.yml && \
+            export PROTON_SERVER=$PROTONVPN_SERVER && \
             docker compose -f ./vpnission/docker-compose-deploy.yml down && \
             docker compose -f ./vpnission/docker-compose-deploy.yml pull && \
             docker compose -f ./vpnission/docker-compose-deploy.yml up -d
